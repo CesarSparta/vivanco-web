@@ -1196,4 +1196,14 @@
      }
  }
 
- @media(width <=480px) {}
+ @media(width <=480px) {
+     .hero-main-img {
+         width: 250px;
+         height: 350px;
+
+     }
+
+     .hero h1 {
+         font-size: 2rem;
+     }
+ }
