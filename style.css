@@ -12,7 +12,7 @@
      margin: 0;
      padding: 0;
      box-sizing: border-box;
-     outline: 1px solid red;
+     /*  outline: 1px solid red; */
  }
 
  html {
@@ -188,6 +188,9 @@
  /* --- HERO SECTION --- */
  .hero {
      position: relative;
+     display: flex;
+     align-items: center;
+     justify-content: center;
      padding: 160px 0 100px;
      min-height: 60vh;
      width: 100%;
@@ -1159,6 +1162,10 @@
 
  @media(width <=991px) {
 
+     .hero {
+         padding: 100px 0;
+     }
+
      .hero-grid {
          grid-template-columns: 1fr;
      }
@@ -1203,7 +1210,12 @@
 
      }
 
+     .hero-content {
+         text-align: center;
+     }
+
      .hero h1 {
-         font-size: 2rem;
+         font-size: 1.8rem;
+
      }
  }
