@@ -150,3 +150,113 @@ document.querySelectorAll('.district-card').forEach(card => {
         card.classList.remove('active-bubble');
     });
 });
+
+// --- CHATBOT GEMINI ---
+const chatbotToggler = document.querySelector(".chatbot-toggler");
+const closeBtn = document.querySelector(".close-btn");
+const chatbox = document.querySelector(".chatbox");
+const chatInput = document.querySelector(".chat-input textarea");
+const sendChatBtn = document.querySelector(".chat-input span");
+
+let userMessage = null; // Mensaje del usuario
+const API_KEY = "AIzaSyBVcbvxmnde-Md_x-vbemZADDvcAUPtxVs"; // ¡PEGA TU API KEY DE GEMINI AQUÍ!
+const inputInitHeight = chatInput.scrollHeight;
+
+const createChatLi = (message, className) => {
+    // Crea un elemento <li> para el chat con el mensaje y la clase
+    const chatLi = document.createElement("li");
+    chatLi.classList.add("chat", `${className}`);
+    let chatContent = className === "outgoing" ? `<p></p>` : `<span class="material-symbols-rounded">smart_toy</span><p></p>`;
+    chatLi.innerHTML = chatContent;
+    chatLi.querySelector("p").textContent = message;
+    return chatLi;
+}
+
+const generateResponse = (chatElement) => {
+    // Usamos gemini-pro que es el modelo estándar y evita el error 404
+    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`;
+    const messageElement = chatElement.querySelector("p");
+
+    const requestOptions = {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            contents: [{
+                parts: [{ text: `Eres un asistente virtual útil y amable para la campaña política de Manuel Vivanco Osorio, candidato a la alcaldía de Huánuco por Renovación Popular. Responde de forma concisa y educada. Pregunta del usuario: ${userMessage}` }]
+            }],
+            // Configuración para evitar bloqueos en temas políticos
+            safetySettings: [
+                { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
+                { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_ONLY_HIGH" },
+                { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_ONLY_HIGH" },
+                { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_ONLY_HIGH" }
+            ]
+        })
+    }
+
+    fetch(API_URL, requestOptions)
+        .then(res => {
+            if (!res.ok) throw new Error(`Error HTTP: ${res.status}`); // Muestra el código exacto (403, 400, 500)
+            return res.json();
+        })
+        .then(data => {
+            // Verificamos si la estructura de la respuesta es correcta
+            if (data.candidates && data.candidates[0].content) {
+                const responseText = data.candidates[0].content.parts[0].text;
+                messageElement.textContent = responseText.replace(/\*\*/g, '');
+            } else {
+                throw new Error("Respuesta vacía o bloqueada por seguridad");
+            }
+        })
+        .catch((error) => {
+            console.error("Detalle del error:", error); // Esto te dirá en la consola qué pasó realmente
+            messageElement.classList.add("error");
+            if (error.message.includes("403")) {
+                messageElement.textContent = "Error: API Key inválida o sin permisos.";
+            } else {
+                messageElement.textContent = "Lo siento, hubo un error. Revisa la consola (F12).";
+            }
+        })
+        .finally(() => chatbox.scrollTo(0, chatbox.scrollHeight));
+}
+
+const handleChat = () => {
+    userMessage = chatInput.value.trim();
+    if (!userMessage) return;
+
+    chatInput.value = "";
+    chatInput.style.height = `${inputInitHeight}px`;
+
+    // Añadir mensaje del usuario
+    chatbox.appendChild(createChatLi(userMessage, "outgoing"));
+    chatbox.scrollTo(0, chatbox.scrollHeight);
+
+    // Mostrar "Escribiendo..." y luego llamar a la API
+    setTimeout(() => {
+        const incomingChatLi = createChatLi("Escribiendo...", "incoming");
+        chatbox.appendChild(incomingChatLi);
+        chatbox.scrollTo(0, chatbox.scrollHeight);
+        generateResponse(incomingChatLi);
+    }, 600);
+}
+
+chatInput.addEventListener("input", () => {
+    chatInput.style.height = `${inputInitHeight}px`;
+    chatInput.style.height = `${chatInput.scrollHeight}px`;
+});
+
+chatInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey && window.innerWidth > 800) {
+        e.preventDefault();
+        handleChat();
+    }
+});
+
+sendChatBtn.addEventListener("click", handleChat);
+closeBtn.addEventListener("click", () => document.body.classList.remove("show-chatbot"));
+chatbotToggler.addEventListener("click", () => document.body.classList.toggle("show-chatbot"));
+
+// Mostrar el chatbot automáticamente después de 5 segundos
+setTimeout(() => {
+    document.body.classList.add("show-chatbot");
+}, 5000);
