@@ -257,6 +257,3 @@ closeBtn.addEventListener("click", () => document.body.classList.remove("show-ch
 chatbotToggler.addEventListener("click", () => document.body.classList.toggle("show-chatbot"));
 
 // Mostrar el chatbot automáticamente después de 5 segundos
-setTimeout(() => {
-    document.body.classList.add("show-chatbot");
-}, 5000);
