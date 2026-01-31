@@ -1025,6 +1025,21 @@
      color: var(--text-dark);
  }
 
+ /* Cambia el color del placeholder */
+ textarea::placeholder {
+     color: var(--bg-light);
+     /* Aquí pones el color que desees (ej: naranja) */
+     opacity: 1;
+     /* Importante: Firefox le baja la opacidad por defecto */
+     font-style: italic;
+     /* Opcional: para que se diferencie más */
+ }
+
+ /* Opcional: Si quieres que cambie de color al hacer clic (focus) */
+ textarea:focus::placeholder {
+     color: #cccccc70;
+ }
+
  .btn-submit {
      grid-column: span 2;
      padding: 16px;
@@ -1575,5 +1590,15 @@
          max-width: 400px;
          width: 100%;
      }
+
+     .join-form {
+         display: block;
+     }
+
+     .form-group {
+         margin-bottom: 20px;
+     }
+
+
 
  }
