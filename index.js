@@ -39,7 +39,14 @@ const observer = new IntersectionObserver((entries) => {
     });
 }, observerOptions);
 
-document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+document.querySelectorAll('.reveal').forEach((el, index) => {
+    if (index % 2 === 0) {
+        el.classList.add('from-left');
+    } else {
+        el.classList.add('from-right');
+    }
+    observer.observe(el);
+});
 
 // Lógica del Carrusel de Proyectos
 const track = document.querySelector('.carousel-track');
@@ -151,109 +158,86 @@ document.querySelectorAll('.district-card').forEach(card => {
     });
 });
 
-// --- CHATBOT GEMINI ---
-const chatbotToggler = document.querySelector(".chatbot-toggler");
-const closeBtn = document.querySelector(".close-btn");
-const chatbox = document.querySelector(".chatbox");
-const chatInput = document.querySelector(".chat-input textarea");
-const sendChatBtn = document.querySelector(".chat-input span");
+// CONFIGURACIÓN CHATBOT GEMINI
+const apiKey = ""; // Se inyecta automáticamente en el entorno
+const chatMessages = document.getElementById('chat-messages');
+const chatForm = document.getElementById('chat-form');
+const chatInput = document.getElementById('chat-input');
+const typingIndicator = document.getElementById('typing');
+const chatWindow = document.getElementById('chat-window');
+const chatBtn = document.getElementById('chat-button');
+const chatClose = document.getElementById('chat-close');
 
-let userMessage = null; // Mensaje del usuario
-const API_KEY = "AIzaSyBVcbvxmnde-Md_x-vbemZADDvcAUPtxVs"; // ¡PEGA TU API KEY DE GEMINI AQUÍ!
-const inputInitHeight = chatInput.scrollHeight;
-
-const createChatLi = (message, className) => {
-    // Crea un elemento <li> para el chat con el mensaje y la clase
-    const chatLi = document.createElement("li");
-    chatLi.classList.add("chat", `${className}`);
-    let chatContent = className === "outgoing" ? `<p></p>` : `<span class="material-symbols-rounded">smart_toy</span><p></p>`;
-    chatLi.innerHTML = chatContent;
-    chatLi.querySelector("p").textContent = message;
-    return chatLi;
+function toggleChat() {
+    chatWindow.classList.toggle('active');
+    if (chatWindow.classList.contains('active')) chatInput.focus();
 }
 
-const generateResponse = (chatElement) => {
-    // Usamos gemini-pro que es el modelo estándar y evita el error 404
-    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`;
-    const messageElement = chatElement.querySelector("p");
+if (chatBtn) chatBtn.addEventListener('click', toggleChat);
+if (chatClose) chatClose.addEventListener('click', toggleChat);
 
-    const requestOptions = {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            contents: [{
-                parts: [{ text: `Eres un asistente virtual útil y amable para la campaña política de Manuel Vivanco Osorio, candidato a la alcaldía de Huánuco por Renovación Popular. Responde de forma concisa y educada. Pregunta del usuario: ${userMessage}` }]
-            }],
-            // Configuración para evitar bloqueos en temas políticos
-            safetySettings: [
-                { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
-                { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_ONLY_HIGH" },
-                { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_ONLY_HIGH" },
-                { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_ONLY_HIGH" }
-            ]
-        })
+async function fetchGemini(prompt) {
+    const systemPrompt = `Eres el asistente virtual oficial de Manuel Vivanco Osorio, candidato de Renovación Popular para la alcaldía de Huánuco 2026. 
+            Tu objetivo es informar a los ciudadanos sobre su visión.
+            Información Clave:
+            - Lema: "Un solo equipo, un mismo destino".
+            - Ejes del Plan: Agricultura y Productividad, Infraestructura, Educación y Salud, Medio Ambiente, Gobierno Transparente, Seguridad Ciudadana y Cero Corrupción.
+            - Valor Principal: "Si tengo a Dios, lo tengo todo".
+            Responde de manera amable, patriótica, profesional y concisa (máximo 3 líneas por respuesta). Siempre enfócate en el progreso de Huánuco.`;
+
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+    let retries = 5;
+    let delay = 1000;
+
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }],
+                    systemInstruction: { parts: [{ text: systemPrompt }] }
+                })
+            });
+            const data = await response.json();
+            return data.candidates?.[0]?.content?.parts?.[0]?.text || "Lo siento, tuve un problema al procesar tu duda. ¿Podrías repetirla?";
+        } catch (error) {
+            if (i === retries - 1) return "Lo sentimos, el servicio no está disponible en este momento. Inténtalo más tarde.";
+            await new Promise(res => setTimeout(res, delay));
+            delay *= 2;
+        }
     }
-
-    fetch(API_URL, requestOptions)
-        .then(res => {
-            if (!res.ok) throw new Error(`Error HTTP: ${res.status}`); // Muestra el código exacto (403, 400, 500)
-            return res.json();
-        })
-        .then(data => {
-            // Verificamos si la estructura de la respuesta es correcta
-            if (data.candidates && data.candidates[0].content) {
-                const responseText = data.candidates[0].content.parts[0].text;
-                messageElement.textContent = responseText.replace(/\*\*/g, '');
-            } else {
-                throw new Error("Respuesta vacía o bloqueada por seguridad");
-            }
-        })
-        .catch((error) => {
-            console.error("Detalle del error:", error); // Esto te dirá en la consola qué pasó realmente
-            messageElement.classList.add("error");
-            if (error.message.includes("403")) {
-                messageElement.textContent = "Error: API Key inválida o sin permisos.";
-            } else {
-                messageElement.textContent = "Lo siento, hubo un error. Revisa la consola (F12).";
-            }
-        })
-        .finally(() => chatbox.scrollTo(0, chatbox.scrollHeight));
 }
 
-const handleChat = () => {
-    userMessage = chatInput.value.trim();
-    if (!userMessage) return;
-
-    chatInput.value = "";
-    chatInput.style.height = `${inputInitHeight}px`;
-
-    // Añadir mensaje del usuario
-    chatbox.appendChild(createChatLi(userMessage, "outgoing"));
-    chatbox.scrollTo(0, chatbox.scrollHeight);
-
-    // Mostrar "Escribiendo..." y luego llamar a la API
-    setTimeout(() => {
-        const incomingChatLi = createChatLi("Escribiendo...", "incoming");
-        chatbox.appendChild(incomingChatLi);
-        chatbox.scrollTo(0, chatbox.scrollHeight);
-        generateResponse(incomingChatLi);
-    }, 600);
+function addMessage(text, role) {
+    const div = document.createElement('div');
+    div.className = `msg ${role}`;
+    div.textContent = text;
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-chatInput.addEventListener("input", () => {
-    chatInput.style.height = `${inputInitHeight}px`;
-    chatInput.style.height = `${chatInput.scrollHeight}px`;
+chatForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const text = chatInput.value.trim();
+    if (!text) return;
+
+    addMessage(text, 'user');
+    chatInput.value = '';
+    typingIndicator.style.display = 'block';
+
+    const response = await fetchGemini(text);
+
+    typingIndicator.style.display = 'none';
+    addMessage(response, 'bot');
 });
 
-chatInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" && !e.shiftKey && window.innerWidth > 800) {
-        e.preventDefault();
-        handleChat();
-    }
-});
+// REVEAL ANIMATIONS
+const observer_n = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('active');
+    });
+}, { threshold: 0.1 });
 
-sendChatBtn.addEventListener("click", handleChat);
-closeBtn.addEventListener("click", () => document.body.classList.remove("show-chatbot"));
-chatbotToggler.addEventListener("click", () => document.body.classList.toggle("show-chatbot"));
-
-// Mostrar el chatbot automáticamente después de 5 segundos
+document.querySelectorAll('.reveal').forEach(el => observer_n.observe(el));

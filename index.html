@@ -53,6 +53,36 @@
         </div>
     </header>
 
+    <!-- CHATBOT GEMINI -->
+    <div id="chat-widget">
+        <div id="chat-window">
+            <div class="chat-header">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span class="material-symbols-rounded"
+                        style="font-size: 24px; background: rgba(255,255,255,0.2); padding: 6px; border-radius: 50%;">smart_toy</span>
+                    <div>
+                        <h4 style="margin: 0; line-height: 1.2;">Asistente Virtual</h4>
+                        <span style="font-size: 0.75rem; opacity: 0.9; font-weight: 400;">En línea | Manuel 2026</span>
+                    </div>
+                </div>
+                <span id="chat-close" style="cursor:pointer; font-size: 1.2rem; padding: 5px;">✕</span>
+            </div>
+            <div class="chat-messages" id="chat-messages">
+                <div class="msg bot">¡Hola! Soy el asistente virtual de Manuel Vivanco Osorio. ¿En qué puedo ayudarte
+                    hoy
+                    sobre nuestro plan para Huánuco?</div>
+            </div>
+            <div class="typing-indicator" id="typing">Escribiendo...</div>
+            <form class="chat-input" id="chat-form">
+                <input type="text" id="chat-input" placeholder="Escribe tu duda aquí..." autocomplete="off">
+                <button type="submit">➤</button>
+            </form>
+        </div>
+        <div id="chat-button">
+            <span class="material-symbols-rounded" style="font-size: 32px;">smart_toy</span>
+        </div>
+    </div>
+
 
     <!-- HERO SECTION (ESTILO PDF) -->
     <section class="hero" id="inicio">
@@ -69,9 +99,9 @@
                 <p class="tagline">"Un solo equipo, un mismo destino: el desarrollo de Huánuco"</p>
 
                 <div class="hero-marca">
-                    <img src="img/logo_rp.png" alt="Marca por Renovación Popular">
-                    <img src="img/logo_rp.png" alt="Marca por Renovación Popular">
-                    <img src="img/logo_rp.png" alt="Marca por Renovación Popular">
+                    <img src="img/logo_rp.png" alt="Marca por Renovación Popular" class="reveal">
+                    <img src="img/logo_rp.png" alt="Marca por Renovación Popular" class="reveal">
+                    <img src="img/logo_rp.png" alt="Marca por Renovación Popular" class="reveal">
                 </div>
 
                 <div class="hero-actions">
@@ -575,40 +605,38 @@
 
     <!-- ÚNETE AL CAMBIO (NUEVO) -->
     <section class="join" id="unete">
-        <div class="container">
-            <h2 class="section-title reveal">Únete al Cambio</h2>
-            <div class="join-container reveal">
-                <p style="text-align: center; margin-bottom: 30px; font-size: 1.1rem; opacity: 0.9;">Tú eres parte
-                    fundamental de este proyecto. Déjanos tus datos y trabajemos juntos por Huánuco.</p>
-                <form class="join-form">
-                    <div class="form-group">
-                        <label>Nombres y Apellidos</label>
-                        <input type="text" placeholder="Ej. Juan Pérez">
-                    </div>
-                    <div class="form-group">
-                        <label>DNI</label>
-                        <input type="text" placeholder="8 dígitos">
-                    </div>
-                    <div class="form-group">
-                        <label>Celular</label>
-                        <input type="tel" placeholder="999 999 999">
-                    </div>
-                    <div class="form-group">
-                        <label>Distrito</label>
-                        <select>
-                            <option>Huánuco</option>
-                            <option>Amarilis</option>
-                            <option>Pillco Marca</option>
-                            <option>Otros...</option>
-                        </select>
-                    </div>
-                    <div class="form-group full">
-                        <label>¿Cómo te gustaría participar?</label>
-                        <textarea rows="4" placeholder="Cuéntanos por qué quieres unirte al equipo..."></textarea>
-                    </div>
-                    <button type="submit" class="btn-submit">Enviar Registro</button>
-                </form>
-            </div>
+        <h2 class="section-title reveal">Únete al Cambio</h2>
+        <div class="join-container reveal">
+            <p style="text-align: center; margin-bottom: 30px; font-size: 1.1rem; opacity: 0.9;">Tú eres parte
+                fundamental de este proyecto. Déjanos tus datos y trabajemos juntos por Huánuco.</p>
+            <form class="join-form">
+                <div class="form-group">
+                    <label>Nombres y Apellidos</label>
+                    <input type="text" placeholder="Ej. Juan Pérez">
+                </div>
+                <div class="form-group">
+                    <label>DNI</label>
+                    <input type="text" placeholder="8 dígitos">
+                </div>
+                <div class="form-group">
+                    <label>Celular</label>
+                    <input type="tel" placeholder="999 999 999">
+                </div>
+                <div class="form-group">
+                    <label>Distrito</label>
+                    <select>
+                        <option>Huánuco</option>
+                        <option>Amarilis</option>
+                        <option>Pillco Marca</option>
+                        <option>Otros...</option>
+                    </select>
+                </div>
+                <div class="form-group full">
+                    <label>¿Cómo te gustaría participar?</label>
+                    <textarea rows="4" placeholder="Cuéntanos por qué quieres unirte al equipo..."></textarea>
+                </div>
+                <button type="submit" class="btn-submit">Enviar Registro</button>
+            </form>
         </div>
     </section>
 
@@ -672,27 +700,8 @@
         </div>
     </footer>
 
-    <!-- CHATBOT GEMINI -->
-    <button class="chatbot-toggler">
-        <span class="material-symbols-rounded">mode_comment</span>
-        <span class="material-symbols-rounded">close</span>
-    </button>
-    <div class="chatbot">
-        <header>
-            <h2>Vivanco IA</h2>
-            <span class="close-btn material-symbols-rounded">close</span>
-        </header>
-        <ul class="chatbox">
-            <li class="chat incoming">
-                <span class="material-symbols-rounded">smart_toy</span>
-                <p>Hola 👋<br>Soy el asistente virtual de Manuel Vivanco. ¿En qué puedo ayudarte hoy?</p>
-            </li>
-        </ul>
-        <div class="chat-input">
-            <textarea placeholder="Escribe un mensaje..." spellcheck="false" required></textarea>
-            <span id="send-btn" class="material-symbols-rounded">send</span>
-        </div>
-    </div>
+
+
 
     <script type="module" src="index.js"></script>
 </body>
